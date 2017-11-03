@@ -17,7 +17,6 @@ namespace Yeelight {
         private static readonly IPEndPoint _multicastEndPoint = new IPEndPoint(IPAddress.Parse("239.255.255.250"), Port);
         private static readonly byte[] _dgram = Encoding.ASCII.GetBytes(SsdpMessage);
 
-        private static readonly char[] _delimiters = "\r\n".ToCharArray();
 
 
         private Socket _ssdpSocket;
@@ -57,85 +56,11 @@ namespace Yeelight {
             SocketReceiveFromResult result;
             while ((result = await _ssdpSocket.ReceiveFromAsync(buffer, SocketFlags.None, _anyEndPoint)).ReceivedBytes > 0) {
                 var message = Encoding.ASCII.GetString(buffer.Array, 0, result.ReceivedBytes);
-                HandleResponse(result.RemoteEndPoint, message);
+
+                var (reason, device) = MessageParser.Parse(message);
+
+                DeviceInformationReceived?.Invoke(this, new DeviceInformationReceivedEventArgs(reason, device));
             }
-        }
-
-        private void HandleResponse(EndPoint sender, string response) {
-            string[] lines = response.Split(_delimiters, StringSplitOptions.RemoveEmptyEntries);
-            Reason reason;
-            if (lines[0] == "HTTP/1.1 200 OK") {
-                reason = Reason.Discovery;
-            } else if (lines[0] == "NOTIFY * HTTP/1.1") {
-                reason = Reason.Advertisement;
-            } else {
-                throw new ProtocolViolationException();
-            }
-
-            var device = new DeviceInformation();
-            foreach (var line in lines.Skip(1)) {
-                var pos = line.IndexOf(':');
-                if (pos <= 0) {
-                    continue;
-                }
-
-                var key = line.Substring(0, pos).Trim();
-                var value = line.Substring(pos + 1).Trim();
-
-                switch (key) {
-                    case "Cache-Control":
-                        var s = value.Substring(value.IndexOf('=') + 1);
-                        device.RefreshInterval = TimeSpan.FromSeconds(int.Parse(s));
-                        break;
-                    case "Location":
-                        device.EndPoint = new Uri(value);
-                        break;
-                    case "id":
-                        device.Id = value;
-                        break;
-                    case "model":
-                        device.Model = value;
-                        break;
-                    case "fw_ver":
-                        device.FirmwareVersion = value;
-                        break;
-                    case "support":
-                        device.SupportedCommands = value.Split('_');
-                        break;
-                    case "power":
-                        device.PoweredOn = value == "on";
-                        break;
-                    case "bright":
-                        device.Brightness = int.Parse(value);
-                        break;
-                    case "color_mode":
-                        device.LightMode = (LightMode)int.Parse(value);
-                        break;
-                    case "ct":
-                        device.ColorTemperature = int.Parse(value);
-                        break;
-                    case "rgb":
-                        device.RGB = int.Parse(value);
-                        break;
-                    case "hue":
-                        device.Hue = int.Parse(value);
-                        break;
-                    case "sat":
-                        device.Saturation = int.Parse(value);
-                        break;
-                    case "name":
-                        device.Name = value;
-                        break;
-                    case "Date":
-                    case "Ext":
-                    case "Server":
-                        break;
-                    default:
-                        throw new ProtocolViolationException($"Unknown key {key}");
-                }
-            }
-
-            DeviceInformationReceived?.Invoke(this, new DeviceInformationReceivedEventArgs(reason, device));
         }
 
         public event EventHandler<DeviceInformationReceivedEventArgs> DeviceInformationReceived;
