@@ -1,0 +1,16 @@
+image: Visual Studio 2017
+configuration: Release
+
+install:
+  - choco install gitversion.portable -pre -y
+
+before_build:
+  - cmd: gitversion /l console /output buildserver
+
+build_script:
+  - cmd: msbuild src\Yeelight.sln /t:restore
+  - cmd: msbuild src\Yeelight.sln /t:restore /p:ExcludeRestorePackageImports=true
+  - cmd: msbuild src\Yeelight.sln /t:build /p:Configuration=%CONFIGURATION% /p:GeneratePackageOnBuild=true
+
+artifacts:
+  - path: '**\*.nupkg'
