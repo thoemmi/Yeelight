@@ -12,5 +12,7 @@ build_script:
   - cmd: msbuild src\Yeelight.sln /t:restore /p:ExcludeRestorePackageImports=true
   - cmd: msbuild src\Yeelight.sln /t:build /p:Configuration=%CONFIGURATION% /p:GeneratePackageOnBuild=true
 
+test: auto
+
 artifacts:
   - path: '**\*.nupkg'
