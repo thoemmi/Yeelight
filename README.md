@@ -1,2 +1,3 @@
 # Yeelight
-A library for 
+
+A library for controlling Yeelight bulbs.
