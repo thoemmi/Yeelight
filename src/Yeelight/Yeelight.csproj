@@ -13,7 +13,7 @@
     <Authors>Thoemmi</Authors>
     <PackageLicenseUrl>https://github.com/thoemmi/Yeelight/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/thoemmi/Yeelight</PackageProjectUrl>
-    <PackageIconUrl>https://github.com/thoemmi/Yeelight/blob/master/assets/yeelight.png</PackageIconUrl>
+    <PackageIconUrl>https://github.com/thoemmi/Yeelight/raw/master/assets/yeelight.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/thoemmi/Yeelight</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>Yeelight</PackageTags>
