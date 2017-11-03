@@ -12,7 +12,13 @@ build_script:
   - cmd: msbuild src\Yeelight.sln /t:restore /p:ExcludeRestorePackageImports=true
   - cmd: msbuild src\Yeelight.sln /t:build /p:Configuration=%CONFIGURATION% /p:GeneratePackageOnBuild=true
 
-test: auto
+before_test:
+  - ps: $sourceDir = Resolve-Path .
+  - ps: $testsDir = "$sourceDir\src\Yeelight.Tests\bin\$env:Configuration\netcoreapp2.0\"
+
+test_script:
+  - ps: cd $testsDir
+  - ps: nunit3-console Thoemmi.Yeelight.Tests.dll --result='myresults.xml;format=AppVeyor'
 
 artifacts:
   - path: '**\*.nupkg'
