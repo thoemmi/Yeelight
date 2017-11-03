@@ -7,6 +7,16 @@
 
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <Description>A library for controlling Yeelight bulbs.</Description>
+    <Copyright>Copyright (c) 2017</Copyright>
+    <Authors>Thoemmi</Authors>
+    <PackageLicenseUrl>https://github.com/thoemmi/Yeelight/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/thoemmi/Yeelight</PackageProjectUrl>
+    <PackageIconUrl>https://github.com/thoemmi/Yeelight/blob/master/assets/yeelight.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/thoemmi/Yeelight</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>Yeelight</PackageTags>
   </PropertyGroup>
 
   <!-- GitVersion version -->
