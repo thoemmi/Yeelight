@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Yeelight {
+namespace Thoemmi.Yeelight {
     public class DeviceInformationReceivedEventArgs : EventArgs {
         public DeviceInformationReceivedEventArgs(Reason reason, DeviceInformation device) {
             Reason = reason;

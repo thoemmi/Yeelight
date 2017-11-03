@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace Yeelight.TestConsole {
+namespace Thoemmi.Yeelight.TestConsole {
     internal class Program {
         private static async Task Main() {
             var listener = new DeviceListener();

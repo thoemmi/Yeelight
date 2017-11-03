@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Yeelight {
+namespace Thoemmi.Yeelight {
     public class DeviceListener {
         private const int Port = 1982;
 

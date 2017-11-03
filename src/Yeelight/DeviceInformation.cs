@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Yeelight {
+namespace Thoemmi.Yeelight {
     public class DeviceInformation {
         public TimeSpan RefreshInterval { get; set; }
         public Uri EndPoint { get; set; }

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 
-namespace Yeelight {
+namespace Thoemmi.Yeelight {
     public static class MessageParser {
         private static readonly char[] _delimiters = "\r\n".ToCharArray();
 

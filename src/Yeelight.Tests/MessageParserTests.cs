@@ -1,7 +1,7 @@
 ﻿using System;
 using NUnit.Framework;
 
-namespace Yeelight.Tests {
+namespace Thoemmi.Yeelight.Tests {
     [TestFixture]
     public class MessageParserTests {
         [Test]
