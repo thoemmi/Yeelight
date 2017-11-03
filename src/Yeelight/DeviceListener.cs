@@ -7,6 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Thoemmi.Yeelight {
+    /// <summary>
+    /// Provides the functionality to discover devices.
+    /// </summary>
     public class DeviceListener {
         private const int Port = 1982;
 
@@ -17,12 +20,13 @@ namespace Thoemmi.Yeelight {
         private static readonly IPEndPoint _multicastEndPoint = new IPEndPoint(IPAddress.Parse("239.255.255.250"), Port);
         private static readonly byte[] _dgram = Encoding.ASCII.GetBytes(SsdpMessage);
 
-
-
         private Socket _ssdpSocket;
 
+        /// <summary>
+        /// Starts the listener for device advertisements and starts discovery of devices asynchronously.
+        /// </summary>
+        /// <returns>An asynchronous task that completes when the device discovery has started.</returns>
         public async Task StartListening() {
-            // create socket
             _ssdpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp) {
                 Blocking = false,
                 Ttl = 1,
@@ -63,6 +67,9 @@ namespace Thoemmi.Yeelight {
             }
         }
 
+        /// <summary>
+        /// This event is raised when either a device was discovered or a device send an advertisement.
+        /// </summary>
         public event EventHandler<DeviceInformationReceivedEventArgs> DeviceInformationReceived;
 
         private static IPAddress GetLocalIPAddress() {

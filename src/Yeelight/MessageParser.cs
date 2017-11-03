@@ -4,9 +4,17 @@ using System.Linq;
 using System.Net;
 
 namespace Thoemmi.Yeelight {
+    /// <summary>
+    /// Helper class to parse messages sent by a device.
+    /// </summary>
     public static class MessageParser {
         private static readonly char[] _delimiters = "\r\n".ToCharArray();
 
+        /// <summary>
+        /// Parses a message received from a device.
+        /// </summary>
+        /// <param name="message">The received message.</param>
+        /// <returns>A tuple specifiying the reason of the message and information about the sending device.</returns>
         public static (Reason reason, DeviceInformation device) Parse(string message) {
             string[] lines = message.Split(_delimiters, StringSplitOptions.RemoveEmptyEntries);
             Reason reason;
