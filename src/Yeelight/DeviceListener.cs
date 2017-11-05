@@ -1,91 +1,61 @@
 ﻿using System;
-using System.Linq;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Thoemmi.Yeelight {
     /// <summary>
-    /// Provides the functionality to discover devices.
+    ///     Provides the functionality to discover devices.
     /// </summary>
     public class DeviceListener {
         private const int Port = 1982;
 
         private const string SsdpMessage = "M-SEARCH * HTTP/1.1\r\nHOST: 239.255.255.250:1982\r\nMAN: \"ssdp:discover\"\r\nST: wifi_bulb";
-
-        private static readonly IPEndPoint _anyEndPoint = new IPEndPoint(IPAddress.Any, 0);
-        private static readonly IPEndPoint _localEndPoint = new IPEndPoint(GetLocalIPAddress(), 0);
-        private static readonly IPEndPoint _multicastEndPoint = new IPEndPoint(IPAddress.Parse("239.255.255.250"), Port);
         private static readonly byte[] _dgram = Encoding.ASCII.GetBytes(SsdpMessage);
 
-        private Socket _ssdpSocket;
+        private static readonly IPAddress _multicastaddress = IPAddress.Parse("239.255.255.250");
+        private static readonly IPEndPoint _multicastEndPoint = new IPEndPoint(_multicastaddress, Port);
 
         /// <summary>
-        /// Starts the listener for device advertisements and starts discovery of devices asynchronously.
+        ///     Starts the listener for device advertisements and starts discovery of devices asynchronously.
         /// </summary>
         /// <returns>An asynchronous task that completes when the device discovery has started.</returns>
-        public async Task StartListening() {
-            _ssdpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp) {
-                Blocking = false,
-                Ttl = 1,
-                UseOnlyOverlappedIO = true,
-                MulticastLoopback = false
-            };
+        public void StartListening() {
+            var client = new UdpClient();
 
-            var localIpAddress = GetLocalIPAddress();
+            client.ExclusiveAddressUse = false;
 
-            Console.WriteLine("Mon ip: " + localIpAddress);
+            client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            client.ExclusiveAddressUse = false;
 
-            _ssdpSocket.Bind(new IPEndPoint(localIpAddress, 0));
+            var localEndPoint = new IPEndPoint(IPAddress.Any, Port);
+            client.Client.Bind(localEndPoint);
 
-            _ssdpSocket.SetSocketOption(
-                SocketOptionLevel.IP,
-                SocketOptionName.AddMembership,
-                new MulticastOption(_multicastEndPoint.Address)
-            );
+            client.JoinMulticastGroup(_multicastaddress);
 
-            // start listening
-#pragma warning disable 4014
-            Listen();
-#pragma warning restore 4014
+            Console.WriteLine("Listening this will never quit so you will need to ctrl-c it");
 
-            await _ssdpSocket.SendToAsync(_dgram, 0, _dgram.Length, SocketFlags.None, _multicastEndPoint);
-        }
+            Task.Factory.StartNew(() => {
+                while (true) {
+                    var data = client.Receive(ref localEndPoint);
+                    var message = Encoding.ASCII.GetString(data);
+                    if (message == SsdpMessage) {
+                        // don't handle search requests (may even be ourselves)
+                        continue;
+                    }
 
-        private async Task Listen() {
-            var buffer = new ArraySegment<byte>(new byte[4096]);
+                    var (reason, device) = MessageParser.Parse(message);
+                    DeviceInformationReceived?.Invoke(this, new DeviceInformationReceivedEventArgs(reason, device));
+                }
+            });
 
-            SocketReceiveFromResult result;
-            while ((result = await _ssdpSocket.ReceiveFromAsync(buffer, SocketFlags.None, _anyEndPoint)).ReceivedBytes > 0) {
-                var message = Encoding.ASCII.GetString(buffer.Array, 0, result.ReceivedBytes);
-
-                var (reason, device) = MessageParser.Parse(message);
-
-                DeviceInformationReceived?.Invoke(this, new DeviceInformationReceivedEventArgs(reason, device));
-            }
+            client.Send(_dgram, _dgram.Length, _multicastEndPoint);
         }
 
         /// <summary>
-        /// This event is raised when either a device was discovered or a device send an advertisement.
+        ///     This event is raised when either a device was discovered or a device send an advertisement.
         /// </summary>
         public event EventHandler<DeviceInformationReceivedEventArgs> DeviceInformationReceived;
-
-        private static IPAddress GetLocalIPAddress() {
-            foreach (var ni in NetworkInterface.GetAllNetworkInterfaces()) {
-                if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet) {
-                    var addr = ni.GetIPProperties().GatewayAddresses.FirstOrDefault();
-                    if (addr != null && !addr.Address.ToString().Equals("0.0.0.0")) {
-                        foreach (var ip in ni.GetIPProperties().UnicastAddresses) {
-                            if (ip.Address.AddressFamily == AddressFamily.InterNetwork) {
-                                return ip.Address;
-                            }
-                        }
-                    }
-                }
-            }
-            throw new Exception("Local IP Address Not Found!");
-        }
     }
 }
