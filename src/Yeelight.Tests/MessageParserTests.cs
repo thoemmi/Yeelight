@@ -15,9 +15,7 @@ Server: POSIX UPnP/1.0 YGLC/1
 id: 0x000000000015243f
 model: color
 fw_ver: 18
-support: get_prop set_default set_power toggle set_bright start_cf stop_cf set_scene
-cron_add cron_get cron_del set_ct_abx set_rgb
-􀀇􀀁
+support: get_prop set_default set_power toggle set_bright start_cf stop_cf set_scene cron_add cron_get cron_del set_ct_abx set_rgb
 power: on
 bright: 100
 color_mode: 2
@@ -57,8 +55,7 @@ Server: POSIX, UPnP/1.0 YGLC/1
 id: 0x000000000015243f
 model: color
 fw_ver: 18
-support: get_prop set_default set_power toggle set_bright start_cf stop_cf set_scene
-cron_add cron_get cron_del set_ct_abx set_rgb
+support: get_prop set_default set_power toggle set_bright start_cf stop_cf set_scene cron_add cron_get cron_del set_ct_abx set_rgb
 power: on
 bright: 100
 color_mode: 2
