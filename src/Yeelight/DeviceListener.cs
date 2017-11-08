@@ -35,21 +35,16 @@ namespace Thoemmi.Yeelight {
 
             client.JoinMulticastGroup(_multicastaddress);
 
-            Console.WriteLine("Listening this will never quit so you will need to ctrl-c it");
-
-            Task.Factory.StartNew(() => {
+            void ProcessResponses() {
                 while (true) {
                     byte[] data = client.Receive(ref localEndPoint);
                     var message = Encoding.ASCII.GetString(data);
-                    if (message == SsdpMessage) {
-                        // don't handle search requests (may even be ourselves)
-                        continue;
-                    }
-
                     var (reason, device) = MessageParser.Parse(message);
                     DeviceInformationReceived?.Invoke(this, new DeviceInformationReceivedEventArgs(reason, device));
                 }
-            });
+            }
+
+            Task.Factory.StartNew(ProcessResponses);
 
             client.Send(_dgram, _dgram.Length, _multicastEndPoint);
         }
