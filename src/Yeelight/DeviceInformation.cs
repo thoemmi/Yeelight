@@ -46,7 +46,7 @@ namespace Thoemmi.Yeelight {
         ///     view to user if necessary. Any control request that invokes method that
         ///     is not included in this field will be rejected by the device.
         /// </remarks>
-        public string[] SupportedCommands { get; set; }
+        public DeviceCapabilities Capabilities { get; set; }
 
         /// <summary>
         ///     Current power status.

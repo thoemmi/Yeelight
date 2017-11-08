@@ -54,7 +54,7 @@ namespace Thoemmi.Yeelight {
                         device.FirmwareVersion = value;
                         break;
                     case "support":
-                        device.SupportedCommands = value.Split('_');
+                        device.Capabilities = DecodeCapabilities(value);
                         break;
                     case "power":
                         device.PoweredOn = value == "on";
@@ -92,6 +92,71 @@ namespace Thoemmi.Yeelight {
             }
 
             return (reason, device);
+        }
+
+        private static DeviceCapabilities DecodeCapabilities(string value) {
+            var capabilities = DeviceCapabilities.None;
+            foreach (var cap in value.Split(' ')) {
+                switch (cap) {
+                    case "get_prop":
+                        capabilities |= DeviceCapabilities.GetProperties;
+                        break;
+                    case "set_ct_abx":
+                        capabilities |= DeviceCapabilities.SetColorTemperature;
+                        break;
+                    case "set_rgb":
+                        capabilities |= DeviceCapabilities.SetRGB;
+                        break;
+                    case "set_hsv":
+                        capabilities |= DeviceCapabilities.SetHSV;
+                        break;
+                    case "set_bright":
+                        capabilities |= DeviceCapabilities.SetBrightness;
+                        break;
+                    case "set_power":
+                        capabilities |= DeviceCapabilities.SetPower;
+                        break;
+                    case "toggle":
+                        capabilities |= DeviceCapabilities.Toggle;
+                        break;
+                    case "set_default":
+                        capabilities |= DeviceCapabilities.SetDefault;
+                        break;
+                    case "start_cf":
+                        capabilities |= DeviceCapabilities.StartColorFlow;
+                        break;
+                    case "stop_cf":
+                        capabilities |= DeviceCapabilities.StopColorFlow;
+                        break;
+                    case "set_scene":
+                        capabilities |= DeviceCapabilities.SetScene;
+                        break;
+                    case "cron_add":
+                        capabilities |= DeviceCapabilities.StartTimer;
+                        break;
+                    case "cron_get":
+                        capabilities |= DeviceCapabilities.GetTimer;
+                        break;
+                    case "cron_del":
+                        capabilities |= DeviceCapabilities.DeleteTimer;
+                        break;
+                    case "set_adjust":
+                        capabilities |= DeviceCapabilities.SetAdjust;
+                        break;
+                    case "set_music":
+                        capabilities |= DeviceCapabilities.SetMusic;
+                        break;
+                    case "set_name":
+                        capabilities |= DeviceCapabilities.SetName;
+                        break;
+                    case "dev_toggle":
+                        capabilities |= DeviceCapabilities.DevToggle;
+                        break;
+                    default:
+                        throw new ArgumentException($"Unsupported capability {cap}");
+                }
+            }
+            return capabilities;
         }
     }
 }
