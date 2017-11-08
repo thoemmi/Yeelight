@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,9 +29,8 @@ namespace Thoemmi.Yeelight {
             client.ExclusiveAddressUse = false;
 
             client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            client.ExclusiveAddressUse = false;
 
-            var localEndPoint = new IPEndPoint(IPAddress.Any, Port);
+            var localEndPoint = new IPEndPoint(GetLocalIPAddress(), 0);
             client.Client.Bind(localEndPoint);
 
             client.JoinMulticastGroup(_multicastaddress);
@@ -38,7 +39,7 @@ namespace Thoemmi.Yeelight {
 
             Task.Factory.StartNew(() => {
                 while (true) {
-                    var data = client.Receive(ref localEndPoint);
+                    byte[] data = client.Receive(ref localEndPoint);
                     var message = Encoding.ASCII.GetString(data);
                     if (message == SsdpMessage) {
                         // don't handle search requests (may even be ourselves)
@@ -57,5 +58,21 @@ namespace Thoemmi.Yeelight {
         ///     This event is raised when either a device was discovered or a device send an advertisement.
         /// </summary>
         public event EventHandler<DeviceInformationReceivedEventArgs> DeviceInformationReceived;
+
+        private static IPAddress GetLocalIPAddress() {
+            foreach (var ni in NetworkInterface.GetAllNetworkInterfaces()) {
+                var addr = ni.GetIPProperties().GatewayAddresses.FirstOrDefault();
+                if (addr != null && !addr.Address.ToString().Equals("0.0.0.0")) {
+                    if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet) {
+                        foreach (var ip in ni.GetIPProperties().UnicastAddresses) {
+                            if (ip.Address.AddressFamily == AddressFamily.InterNetwork) {
+                                return ip.Address;
+                            }
+                        }
+                    }
+                }
+            }
+            throw new Exception("Local IP Address Not Found!");
+        }
     }
 }
